@@ -23,15 +23,17 @@ class Todos:
         except Error as e:
             print(e)
 
-    def add_todo(self, conn, todo, cur):
+    def add_todo(self, conn, todo, cur, title, description):
         """
         Create a new projekt into the todos table
         :param conn:
         :param projekt:
         :return: todo id
         """
-        sql = '''INSERT INTO todos(title, description)
-                    VALUES(?,?)'''
+        self.todo = todo
+        self.title = title
+        self.description = description
+        sql = f"INSERT INTO todos (title, description) {todo}"
         self.cur = conn.cursor()
         self.cur.execute(sql, todo)
         self.conn.commit()
@@ -110,11 +112,15 @@ class Todos:
         self.conn.commit()
         print("Deleted")
 
+    def __str__(self):
+        return f'{self.conn}, {self.cur}, {self.todo}, {self.title}, {self.description}'
+
 
 
 if __name__ == "__main__":
 
    db_file = "todos.db"
+   Todos = db_file
 
    #conn = create_connection(db_file)
 
@@ -125,11 +131,11 @@ if __name__ == "__main__":
    #todo_id = add_todo(conn, todo3)
    
    db_file.add_todo(todo1)
-   todo1.add_todo()
-   todo2.add_todo()
-   todo3.add_todo()
+   #todo1.add_todo()
+   #todo2.add_todo()
+   #todo3.add_todo()
    
-   Todos.select_all()
+   db_file.select_all()
    
 
 
