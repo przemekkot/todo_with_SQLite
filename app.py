@@ -64,7 +64,9 @@ class Todos:
         cur.execute(f"SELECT * FROM todos WHERE {q}", values)
         return cur.fetchall()
 
-    def update(self, **kwargs):
+    #def update(self, **kwargs):
+    #def update(self, id, title, description, done): i wtedy musze przekazać każdy argument, jak w lini 94
+    def update(self, id, title=None, description=None, done=None): #dzięki temu przekazuję tylko wybrany argument, nie muszę wszystkich
         """
         update title, description and done status of todo
         :param conn:
@@ -72,16 +74,32 @@ class Todos:
         :param id: row id
         :return:
         """
-        parameters = [f"{k} = ?" for k in kwargs]
-        parameters = ", ".join(parameters)
-        values = tuple(v for v in kwargs.values())
-        values += (id, )
+        #parameters = [f"{k} = ?" for k in kwargs]
+        #parameters = ", ".join(parameters)
+        #values = tuple(v for v in kwargs.values())
+        #values += (id, )
 
         #sql = f''' UPDATE todos SET {parameters} WHERE id = ?'''
+        parameters = {} #tworzę słownik gdzie klucz to nazwa kolumny, a wartość to wartość z tabeli dla danej kolumny 
+        if title is not None: #jeśli coś przekazuje dla kolumny title to słownik ładuje się o klucz: wartość, a jak nie to nic nie jest przekazywane do słownika i nie wyląduje w kodzie sql
+            parameters['title'] = title
+        if description is not None: # i tak dla każdej kolumny poza id bo nią operujemy, szukamy pozyci w tabeli, więc i tak ją użyjemy
+            parameters['description'] = description
+        if done is not None:
+            parameters['done'] = done
+        values = tuple(v for v in parameters.values()) # tworzymy krotkę z wartości w słowniku, które potem przejazujemy do cur.execute
+        parameters = [f"{k} = ?" for k in parameters] # tworzymy listę w postaci następującyh wartości ze słownika: klucz = ?, klucz = ? itd.
+        parameters = ", ".join(parameters) # tworzymy str z listy powyżej, wartości są rozdzielone przecinkiem i to ląduje w kodzie sql, z wyjściowego słownika mamy teraz tylko tekst, dlatego trzeba zwracać uwagę na kolejność co kiedy jest wywoływane > values musiało zostać przerzucone 2 linijki wcześniej póki parameters to jeszcze słownik
+        
+        #sql = f''' UPDATE todos SET title = '{title}', description = '{description}', done = {done} WHERE id = {id}'''
+        sql = f''' UPDATE todos SET {parameters} WHERE id = {id}'''
         try:
             cur = self.conn.cursor()
-            #cur.execute(sql, values)
-            cur.execute(f"UPDATE todos SET {parameters} WHERE id = ?", values)
+            print(sql) # dodaliśmy sobie żeby zobaczyć jaki jest wywoływany ostatecznie kod sql
+            #print(values) 
+            #cur.execute(sql) # gdy wywołujemy sql z lini 94
+            cur.execute(sql, values)
+            #cur.execute(f"UPDATE todos SET {parameters} WHERE id = ?", values)
             self.conn.commit()
             print("OK")
         except sqlite3.OperationalError as e:
@@ -134,7 +152,8 @@ if __name__ == "__main__":
 
    #print(todos_model.select_where(id=2))
 
-   todos_model.update(id=1, done=True)
+   #todos_model.update(id=1, title=todo1[0], description=todo1[1], done=True)
+   todos_model.update(id=2, done=True)
    #todos_model.update(title="Zakpy", done=bool(1)
 
    #todos_model.add_todo(todo4)
@@ -142,28 +161,3 @@ if __name__ == "__main__":
    #todos_model.delete_where(id=4)
 
    print(todos_model.select_all())
-
-
-
-
-   """
-   if conn is not None:
-       #create_table(conn, create_table_todos)
-       #add_todo(conn, todo1)
-       #add_todo(conn, todo2)
-       #add_todo(conn, todo3)
-       #print(todo_id)
-       #conn.commit()
-       #update(conn, "todos", 1, done="TRUE")
-       #conn.commit()
-       print(select_all(conn, "todos"))
-       add_todo(conn, todo4)
-       conn.commit()
-       print(select_all(conn, "todos"))
-       delete_where(conn, "todos", id=4)
-       conn.commit()
-       print(select_all(conn, "todos"))
-       conn.close()
-"""
-
-
