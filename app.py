@@ -13,7 +13,7 @@ class Todos:
         id integer PRIMARY KEY,
         title VARCHAR(50) NOT NULL,
         description text,
-        done BOOLEAN DEFAULT "FALSE" NOT NULL
+        done BOOLEAN DEFAULT FALSE NOT NULL
         )'''
         self.conn = None
         try:
@@ -77,12 +77,11 @@ class Todos:
         values = tuple(v for v in kwargs.values())
         values += (id, )
 
-        sql = f''' UPDATE todos
-                    SET {parameters}
-                    WHERE id = ?'''
+        #sql = f''' UPDATE todos SET {parameters} WHERE id = ?'''
         try:
             cur = self.conn.cursor()
-            cur.execute(sql, values)
+            #cur.execute(sql, values)
+            cur.execute(f"UPDATE todos SET {parameters} WHERE id = ?", values)
             self.conn.commit()
             print("OK")
         except sqlite3.OperationalError as e:
@@ -135,7 +134,7 @@ if __name__ == "__main__":
 
    #print(todos_model.select_where(id=2))
 
-   todos_model.update(id=1, done="TRUE")
+   todos_model.update(id=1, done=True)
    #todos_model.update(title="Zakpy", done=bool(1)
 
    #todos_model.add_todo(todo4)
